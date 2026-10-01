@@ -520,3 +520,103 @@ The staff directory view for administrators.
 
 ### Interview explanation:
 > "`routers/users.py` provides administrative user inspection endpoints protected by the `require_admin` dependency."
+
+
+---
+
+## File: `frontend/package.json`
+
+### Purpose:
+Declares frontend package dependencies, metadata, and build scripts for the React application.
+
+### Why it exists:
+Defines dependencies including React 18, ReactDOM, Vite 5, and Lucide-React icons for UI rendering.
+
+### Important code:
+* `"scripts": { "dev": "vite --port 3000", "build": "vite build" }`
+
+---
+
+## File: `frontend/vite.config.js`
+
+### Purpose:
+Vite build tool configuration and local development server proxy.
+
+### Why it exists:
+Proxies requests from `/api` to `http://localhost:8000` during local development, preventing cross-origin CORS friction in the browser.
+
+---
+
+## File: `frontend/src/api/client.js`
+
+### Purpose:
+Centralized HTTP client helper wrapping the native browser `fetch` API.
+
+### Why it exists:
+Automatically injects the stored JWT token into the `Authorization: Bearer <token>` header for every outgoing request and triggers automatic logout if the backend returns HTTP 401 Unauthorized.
+
+---
+
+## File: `frontend/src/context/AuthContext.jsx`
+
+### Purpose:
+Global React Context managing user authentication state, token storage, and session synchronization.
+
+### Why it exists:
+Persists user login state across page reloads via `localStorage`, verifies token freshness on app boot, and provides `useAuth()` to all components.
+
+---
+
+## File: `frontend/src/components/Navbar.jsx`
+
+### Purpose:
+Application header component with user identity greeting, role badge, server health indicator, and logout action.
+
+---
+
+## File: `frontend/src/components/StatusBadge.jsx`
+
+### Purpose:
+Status indicator pill component featuring glowing, animated status dots and humanized state labels (`Pending Approval`, `Automating...`, `Fulfilled / Ready`).
+
+---
+
+## File: `frontend/src/components/StatCard.jsx`
+
+### Purpose:
+Dashboard summary card displaying metrics (Total Tickets, Pending Approval, Fulfilled, Access Level) with visual icons.
+
+---
+
+## File: `frontend/src/components/AutomationTerminal.jsx`
+
+### Purpose:
+Dark-themed cloud console modal displaying simulated AWS infrastructure provisioning transcripts with timestamp highlighting and a copy-to-clipboard button.
+
+---
+
+## File: `frontend/src/components/NewRequestModal.jsx`
+
+### Purpose:
+Interactive modal dialog allowing users to select infrastructure services (EC2, S3, RDS, Password Reset) with plain-English descriptions and submit new tickets.
+
+---
+
+## File: `frontend/src/pages/AuthPage.jsx`
+
+### Purpose:
+Unified authentication view with tabbed Sign In and Register forms, including one-click Demo Fill buttons for rapid testing of Employee and Admin roles.
+
+---
+
+## File: `frontend/src/pages/Dashboard.jsx`
+
+### Purpose:
+Main authenticated portal view featuring metric cards, status tabs, search filter, ticket list with administrative automation execution triggers, and log inspection.
+
+---
+
+## File: `frontend/Dockerfile`
+
+### Purpose:
+Multi-stage container definition that compiles the React application with Node.js and serves the production static bundle using a lightweight Nginx image.

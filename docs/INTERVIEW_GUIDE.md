@@ -90,3 +90,16 @@ This guide prepares you to explain the **Cloud-Based IT Service Request & Automa
 ### Q12: How do you prevent unauthorized users from executing tickets?
 > **Answer**:
 > "We protect the `/api/requests/{id}/execute` endpoint with our `require_admin` dependency. FastAPI intercepts the incoming JWT, validates the user's role claim against the database, and immediately raises an HTTP 403 Forbidden exception if a standard employee attempts to execute it. This guarantees that only authorized IT administrators can trigger infrastructure workflows."
+
+
+---
+
+## Level 8: Frontend Architecture & React Integration
+
+### Q13: How does your React frontend manage authentication and persist user sessions?
+> **Answer**:
+> "We implement an `AuthContext` using React Context and `localStorage`. When a user logs in, the JWT access token and sanitized user profile are stored in `localStorage`. On application boot, `AuthContext` queries `/api/auth/me` to verify that the token is still cryptographically valid. Our centralized API client helper automatically injects the `Authorization: Bearer <token>` header into all outgoing fetch calls and dispatches an automatic logout event if a 401 Unauthorized response is received."
+
+### Q14: How does the frontend handle Cross-Origin Resource Sharing (CORS) during development?
+> **Answer**:
+> "During local development, our Vite configuration uses a local proxy (`/api` $\rightarrow$ `http://localhost:8000`). This allows the React client to make same-origin requests to port 3000, while Vite transparently forwards the traffic to the FastAPI backend, eliminating browser CORS issues in development while keeping endpoints relative and portable for production."
