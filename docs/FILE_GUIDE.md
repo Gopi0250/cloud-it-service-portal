@@ -443,3 +443,80 @@ The front door and brain of the backend server.
 
 ### Interview explanation:
 > "`main.py` bootstraps the FastAPI application, configuring lifespan lifecycle hooks, CORS middleware for frontend communication, router aggregation, and the operational `/api/health` probe."
+
+
+---
+
+## File: `backend/app/services/automation.py`
+
+### Purpose:
+Simulated IT automation engine that executes mock cloud provisioning and IT infrastructure fulfillment routines.
+
+### Why it exists:
+Models real-world cloud service workflows (`VM_PROVISION`, `S3_ACCESS`, `DB_ACCOUNT`, `PASSWORD_RESET`) in Python without incurring cloud costs or requiring AWS credentials.
+
+### Important code:
+* `def execute_service_request(request: ServiceRequest, db: Session) -> ServiceRequest`:
+  * Sets status to `IN_PROGRESS`.
+  * Generates mock cloud IDs (`i-0...`, `vol-0...`, `arn:aws:...`).
+  * Formats audit lines with `[SIMULATED-AWS-ENGINE]`.
+  * Saves transcript to `request.automation_log` and transitions status to `COMPLETED`.
+
+### What other files interact with it:
+* Called by [`backend/app/routers/requests.py`](file:///c:/Users/Gopi/OneDrive/Desktop/cloud-it-service-portal/backend/app/routers/requests.py) inside the `/execute` endpoint.
+
+### Beginner explanation:
+The automated robot worker. When an admin clicks "Execute", this file runs the mock provisioning steps and writes the transcript.
+
+### Interview explanation:
+> "`automation.py` encapsulates our infrastructure fulfillment simulation. It models real AWS provisioning lifecycles with mock resource identifiers and timestamped audit logs, designed for seamless replacement with the AWS `boto3` SDK in the future."
+
+---
+
+## File: `backend/app/routers/requests.py`
+
+### Purpose:
+REST API router for service request ticket management (`POST`, `GET`, `/execute`, `DELETE`).
+
+### Why it exists:
+Exposes HTTP endpoints for submitting tickets, filtering requests by role, triggering automated fulfillment, and cancelling pending requests.
+
+### Important code:
+* `POST /requests`: Submits new ticket in `PENDING` status.
+* `GET /requests`: Role-based filtering (Employees see own tickets; Admins see all).
+* `POST /requests/{id}/execute`: Locked to `ADMIN` only; triggers `execute_service_request()`.
+* `DELETE /requests/{id}`: Cancels pending tickets (employee) or deletes tickets (admin).
+
+### What other files interact with it:
+* Uses models in [`backend/app/models/`](file:///c:/Users/Gopi/OneDrive/Desktop/cloud-it-service-portal/backend/app/models).
+* Uses dependencies in [`backend/app/dependencies.py`](file:///c:/Users/Gopi/OneDrive/Desktop/cloud-it-service-portal/backend/app/dependencies.py).
+* Mounted onto the FastAPI app in [`backend/app/main.py`](file:///c:/Users/Gopi/OneDrive/Desktop/cloud-it-service-portal/backend/app/main.py).
+
+### Beginner explanation:
+The ticketing window where employees hand in their requests, check on their status, and admins approve them.
+
+### Interview explanation:
+> "`routers/requests.py` manages ticket lifecycles and implements data isolation, enforcing ownership rules for standard users and privileged execution guards for administrators."
+
+---
+
+## File: `backend/app/routers/users.py`
+
+### Purpose:
+REST API router for administrative user management.
+
+### Why it exists:
+Provides an administrative directory endpoint to inspect registered user accounts and their assigned roles.
+
+### Important code:
+* `GET /users`: Locked to `require_admin`, returns `List[UserResponse]`.
+
+### What other files interact with it:
+* Injected with `require_admin` from `app.dependencies`.
+* Mounted in `app.main`.
+
+### Beginner explanation:
+The staff directory view for administrators.
+
+### Interview explanation:
+> "`routers/users.py` provides administrative user inspection endpoints protected by the `require_admin` dependency."

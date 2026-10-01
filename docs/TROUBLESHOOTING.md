@@ -61,3 +61,38 @@ Design applications to be container-friendly (using environment variables and st
 
 ### What I learned:
 Do not assume every developer or CI environment has Docker active. Writing decoupled code that runs both in Docker containers and directly in a virtual environment provides maximum resilience.
+
+
+---
+
+## Issue 3: NameError on Router Registration in `main.py`
+
+### Problem:
+When starting the test server after creating `requests.py` and `users.py`, the application failed to boot with a `NameError`.
+
+### Error message:
+```text
+File "backend/app/main.py", line 47, in <module>
+    app.include_router(requests.router, prefix="/api")
+NameError: name 'requests' is not defined
+```
+
+### What caused it:
+`main.py` called `app.include_router(requests.router)` and `app.include_router(users.router)`, but the import statement at the top of `main.py` was only importing `auth`:
+`from app.routers import auth`
+
+### How we diagnosed it:
+Inspecting the top of `backend/app/main.py` showed that `requests` and `users` were missing from the import tuple.
+
+### Fix:
+Updated line 9 of [`backend/app/main.py`](file:///c:/Users/Gopi/OneDrive/Desktop/cloud-it-service-portal/backend/app/main.py) to:
+```python
+from app.routers import auth, requests, users
+```
+Re-ran the automated integration test: all 8 test suites passed with zero errors.
+
+### How to prevent it:
+When adding new routers or submodules, always update both the router mounting calls AND the top-level import statement in `main.py`.
+
+### What I learned:
+In Python, variables or modules must be imported in the same file where they are referenced. Even if `app/routers/__init__.py` exports them, `main.py` must explicitly import them into its local namespace.

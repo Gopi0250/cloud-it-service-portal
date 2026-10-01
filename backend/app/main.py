@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from app.config import settings
 from app.database import engine, Base, get_db
-from app.routers import auth
+from app.routers import auth, requests, users
 import app.models  # Ensures all models are registered with Base.metadata
 
 
@@ -44,6 +44,8 @@ app.add_middleware(
 
 # Mount API Routers under /api
 app.include_router(auth.router, prefix="/api")
+app.include_router(requests.router, prefix="/api")
+app.include_router(users.router, prefix="/api")
 
 
 @app.get("/", include_in_schema=False)

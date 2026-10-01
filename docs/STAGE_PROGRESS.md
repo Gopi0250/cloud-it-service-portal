@@ -42,11 +42,14 @@ Statuses used:
 ---
 
 ### Stage 3 — Service Requests & Simulated Automation Engine
-* **Status**: **NOT STARTED**
-* **Goal**:
-  * Service request lifecycle CRUD endpoints (`POST`, `GET`, `DELETE` on `/api/requests`).
-  * Role-based request filtering (Employees see own tickets, Admins see all).
-  * Simulated IT Automation Engine (`app/services/automation.py`) generating mock resource IDs and execution logs for simulated VM provisioning, S3 access, DB access, and password resets.
+* **Status**: **COMPLETED**
+* **Completed Date**: October 2026
+* **Key Achievements**:
+  * Simulated IT Automation Engine ([`app/services/automation.py`](file:///c:/Users/Gopi/OneDrive/Desktop/cloud-it-service-portal/backend/app/services/automation.py)) supporting `VM_PROVISION`, `S3_ACCESS`, `DB_ACCOUNT`, and `PASSWORD_RESET`.
+  * Service Requests REST router ([`app/routers/requests.py`](file:///c:/Users/Gopi/OneDrive/Desktop/cloud-it-service-portal/backend/app/routers/requests.py)) with role-based query isolation.
+  * Administrator execution trigger (`POST /api/requests/{id}/execute`) with `require_admin` guard.
+  * Administrative user directory (`GET /api/users`).
+  * 100% integration tests passed verifying ticket creation, RBAC restrictions, execution transcripts, and ticket cancellation.
 
 ---
 

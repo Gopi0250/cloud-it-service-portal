@@ -73,3 +73,20 @@ This guide prepares you to explain the **Cloud-Based IT Service Request & Automa
 ### Q10: What happens if your MySQL database temporarily goes offline?
 > **Answer**:
 > "Our `/api/health` endpoint actively monitors database connectivity by executing a `SELECT 1` query. If MySQL goes down, `/api/health` reports the database as unhealthy. Furthermore, incoming requests to protected routes will receive clean HTTP 500 error responses handled by FastAPI rather than unhandled server crashes."
+
+
+---
+
+## Level 7: Automation & Workflow Scenario Questions
+
+### Q11: Why is your automation engine simulated, and how would you transition it to real AWS?
+> **Answer**:
+> "The automation engine is intentionally simulated to allow complete local development, testing, and portfolio demonstration with zero cloud infrastructure costs and zero credential security risks. To transition to real AWS, we would:
+> 1. Install the official AWS Python SDK (`boto3`).
+> 2. Attach an IAM role to our EC2 host providing least-privilege permissions (`ec2:RunInstances`, `s3:CreateBucket`).
+> 3. Replace the mock ID generators in `automation.py` with `boto3.client('ec2').run_instances()` and `boto3.client('s3').put_bucket_policy()`.
+> Because the service interface returns a standardized log transcript, the REST API and React frontend wouldn't require any structural changes."
+
+### Q12: How do you prevent unauthorized users from executing tickets?
+> **Answer**:
+> "We protect the `/api/requests/{id}/execute` endpoint with our `require_admin` dependency. FastAPI intercepts the incoming JWT, validates the user's role claim against the database, and immediately raises an HTTP 403 Forbidden exception if a standard employee attempts to execute it. This guarantees that only authorized IT administrators can trigger infrastructure workflows."
