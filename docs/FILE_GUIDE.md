@@ -620,3 +620,21 @@ Main authenticated portal view featuring metric cards, status tabs, search filte
 
 ### Purpose:
 Multi-stage container definition that compiles the React application with Node.js and serves the production static bundle using a lightweight Nginx image.
+
+
+---
+
+## File: `README.md`
+
+### Purpose:
+The main public documentation and portfolio showcase for the entire repository.
+
+### Why it exists:
+Serves as the front door for recruiters, interviewers, and developers visiting your GitHub repository. It clearly presents the architecture diagram, technical justifications, local quickstart guide, REST API table, and an honest status matrix separating implemented, simulated, and planned cloud features.
+
+### Important sections:
+* System Architecture diagram (Mermaid).
+* Implementation Status Matrix (Honest breakdown for resumes).
+* Local Quickstart Guide (Step-by-step terminal commands).
+* REST API Reference table.
+* AWS Cloud Migration Blueprint.
