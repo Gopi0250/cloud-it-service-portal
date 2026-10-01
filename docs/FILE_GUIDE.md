@@ -176,3 +176,270 @@ It's the blueprint for building our backend container. It tells Docker how to se
 
 ### Interview explanation:
 > "Our backend Dockerfile creates a lean Python 3.11 slim image. It uses layered caching for dependencies and sets up the Uvicorn ASGI server as the container entrypoint."
+
+
+---
+
+## File: `backend/app/config.py`
+
+### Purpose:
+Loads, parses, and validates all environment variables and configuration settings from `backend/.env`.
+
+### Why it exists:
+Centralizes application settings into a strongly-typed Pydantic `Settings` class so credentials and URLs are never scattered or hardcoded across the codebase.
+
+### Important code:
+* `class Settings(BaseSettings)`: Defines typed configuration variables.
+* `@computed_field @property def DATABASE_URL`: Dynamically constructs the SQLAlchemy MySQL connection string.
+
+### What happens when the application starts:
+Pydantic reads `.env`, validates types, and creates a singleton `settings` object used throughout the backend.
+
+### What other files interact with it:
+* [`backend/app/database.py`](file:///c:/Users/Gopi/OneDrive/Desktop/cloud-it-service-portal/backend/app/database.py)
+* [`backend/app/security.py`](file:///c:/Users/Gopi/OneDrive/Desktop/cloud-it-service-portal/backend/app/security.py)
+* [`backend/app/main.py`](file:///c:/Users/Gopi/OneDrive/Desktop/cloud-it-service-portal/backend/app/main.py)
+
+### Beginner explanation:
+Think of `config.py` as the settings dashboard in your smartphone. All backend settings live in one convenient place.
+
+### Interview explanation:
+> "`config.py` implements centralized environment configuration using Pydantic `BaseSettings`, guaranteeing that all required database credentials, security keys, and CORS policies are present and valid before the server accepts traffic."
+
+---
+
+## File: `backend/app/database.py`
+
+### Purpose:
+Initializes the SQLAlchemy database engine, session factory (`SessionLocal`), declarative Base, and the `get_db` session generator.
+
+### Why it exists:
+To establish and manage pooled database connections to MySQL safely and prevent connection exhaustion.
+
+### Important code:
+* `engine = create_engine(settings.DATABASE_URL, pool_pre_ping=True, pool_recycle=3600)`
+* `Base = declarative_base()`: Base class for all ORM models.
+* `def get_db()`: Dependency yielding an isolated session and closing it inside a `finally` block.
+
+### What happens when the application starts:
+Creates the connection pool. `get_db()` provides a fresh database session whenever an API endpoint requires database access.
+
+### What other files interact with it:
+* All ORM models in `backend/app/models/`.
+* Injected into routers via `db: Session = Depends(get_db)`.
+
+### Beginner explanation:
+It is the water faucet connecting your Python code to the MySQL reservoir. Whenever you need data, it opens the tap, and when you finish, it always turns it off.
+
+### Interview explanation:
+> "`database.py` configures our SQLAlchemy connection pool with `pool_pre_ping=True` for resilient connection recovery and provides the `get_db` generator dependency to enforce per-request session lifecycles."
+
+---
+
+## File: `backend/app/models/user.py`
+
+### Purpose:
+SQLAlchemy ORM model defining the `users` table in MySQL.
+
+### Why it exists:
+Defines user entity attributes, credential storage, role classification (`EMPLOYEE` / `ADMIN`), and relational foreign key linking to tickets.
+
+### Important code:
+* `id = Column(Integer, primary_key=True)`
+* `email = Column(String(150), unique=True, index=True, nullable=False)`
+* `hashed_password = Column(String(255), nullable=False)`
+* `role = Column(String(20), default="EMPLOYEE")`
+* `service_requests = relationship("ServiceRequest", back_populates="owner", cascade="all, delete-orphan")`
+
+### What happens when the application starts:
+SQLAlchemy maps this Python class to the physical `users` table inside MySQL.
+
+### What other files interact with it:
+* [`backend/app/models/service_request.py`](file:///c:/Users/Gopi/OneDrive/Desktop/cloud-it-service-portal/backend/app/models/service_request.py)
+* [`backend/app/routers/auth.py`](file:///c:/Users/Gopi/OneDrive/Desktop/cloud-it-service-portal/backend/app/routers/auth.py)
+* [`backend/app/dependencies.py`](file:///c:/Users/Gopi/OneDrive/Desktop/cloud-it-service-portal/backend/app/dependencies.py)
+
+### Beginner explanation:
+The Python blueprint describing what a user account looks like in our database.
+
+### Interview explanation:
+> "`user.py` defines our User entity in SQLAlchemy with indexed unique email constraints, bcrypt hashed credentials, and a one-to-many relationship with cascade deletion for owned service requests."
+
+---
+
+## File: `backend/app/models/service_request.py`
+
+### Purpose:
+SQLAlchemy ORM model defining the `service_requests` table in MySQL.
+
+### Why it exists:
+Tracks IT ticket lifecycles, user ownership, priority levels, status, and simulated cloud execution transcripts.
+
+### Important code:
+* `user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)`
+* `service_type = Column(String(50), nullable=False)`
+* `status = Column(String(20), default="PENDING")`
+* `automation_log = Column(Text, nullable=True)`
+
+### What happens when the application starts:
+Maps to `service_requests` table in MySQL with foreign key constraints.
+
+### What other files interact with it:
+* [`backend/app/models/user.py`](file:///c:/Users/Gopi/OneDrive/Desktop/cloud-it-service-portal/backend/app/models/user.py)
+* Upcoming requests router and automation service.
+
+### Beginner explanation:
+The Python blueprint describing an IT ticket in our database.
+
+### Interview explanation:
+> "`service_request.py` defines the ticket entity with relational foreign keys to users, status tracking from PENDING to COMPLETED, and text storage for automation engine execution logs."
+
+---
+
+## File: `backend/app/security.py`
+
+### Purpose:
+Cryptographic utilities for password hashing (`bcrypt`) and JWT token management (`pyjwt`).
+
+### Why it exists:
+Guarantees that plaintext passwords are never stored and provides stateless token authentication.
+
+### Important code:
+* `hash_password(password)`: Hashes plaintext with `bcrypt.gensalt(12)`.
+* `verify_password(plain, hashed)`: Constant-time password verification.
+* `create_access_token(data, delta)`: Generates signed JWT with expiration.
+* `decode_access_token(token)`: Validates JWT signature.
+
+### What happens when called:
+Used during user registration, login, and authorization checks.
+
+### What other files interact with it:
+* [`backend/app/routers/auth.py`](file:///c:/Users/Gopi/OneDrive/Desktop/cloud-it-service-portal/backend/app/routers/auth.py)
+* [`backend/app/dependencies.py`](file:///c:/Users/Gopi/OneDrive/Desktop/cloud-it-service-portal/backend/app/dependencies.py)
+
+### Beginner explanation:
+The security guard of the application. It creates unforgeable digital badges (JWT) and encodes passwords.
+
+### Interview explanation:
+> "`security.py` encapsulates our cryptographic operations, providing salted bcrypt password hashing and HMAC-SHA256 JWT encoding/decoding with automated expiration enforcement."
+
+---
+
+## File: `backend/app/schemas/user.py`
+
+### Purpose:
+Pydantic validation schemas for user input payloads and sanitized responses.
+
+### Why it exists:
+Filters data crossing the HTTP boundary to prevent malformed data from reaching the database and prevent passwords from leaking in API responses.
+
+### Important code:
+* `UserRegister`: Validates name, email format, and password length.
+* `UserResponse`: Returns public user attributes (`hashed_password` is excluded).
+* `Token`: Structure for login response containing JWT string and user object.
+
+### What other files interact with it:
+* [`backend/app/routers/auth.py`](file:///c:/Users/Gopi/OneDrive/Desktop/cloud-it-service-portal/backend/app/routers/auth.py)
+
+### Beginner explanation:
+The security scanner at an airport. It checks bags coming in to make sure nothing bad enters, and checks what leaves to make sure secrets don't escape.
+
+### Interview explanation:
+> "Pydantic user schemas enforce input contracts on registration and login payloads while sanitizing outbound user data via response models to prevent password hash leakage."
+
+---
+
+## File: `backend/app/schemas/service_request.py`
+
+### Purpose:
+Pydantic validation schemas for IT service requests.
+
+### Why it exists:
+Ensures tickets submitted by clients contain valid service types (`VM_PROVISION`, `S3_ACCESS`, etc.) and valid priority levels (`LOW`, `MEDIUM`, `HIGH`).
+
+### Important code:
+* `RequestCreate`: Validates title, service type, and priority.
+* `RequestResponse`: Serializes ticket information and execution logs for the frontend.
+
+### What other files interact with it:
+* Upcoming service request router.
+
+### Beginner explanation:
+A structured form template that ensures every required field on an IT ticket is filled out correctly.
+
+### Interview explanation:
+> "`service_request.py` schemas validate ticket creation parameters against predefined allowable service types and priorities using Pydantic field validators."
+
+---
+
+## File: `backend/app/dependencies.py`
+
+### Purpose:
+FastAPI dependency injection functions for JWT Bearer token authentication and role verification.
+
+### Why it exists:
+Secures endpoints so that unauthenticated or unauthorized users are blocked with HTTP 401 or 403 errors before the endpoint logic executes.
+
+### Important code:
+* `get_current_user`: Extracts token from `Authorization: Bearer <token>`, decodes it, and retrieves the User from MySQL.
+* `require_admin`: Confirms that `current_user.role == 'ADMIN'`, raising HTTP 403 Forbidden otherwise.
+
+### What other files interact with it:
+* Injected into protected routes in `backend/app/routers/`.
+
+### Beginner explanation:
+The security checkpoint inside the building. It checks your badge before you can enter restricted rooms.
+
+### Interview explanation:
+> "`dependencies.py` implements reusable authentication and RBAC guards via FastAPI's dependency injection system, enforcing stateless JWT validation and role requirements cleanly across route handlers."
+
+---
+
+## File: `backend/app/routers/auth.py`
+
+### Purpose:
+FastAPI router handling user registration, login, and current user profile retrieval.
+
+### Why it exists:
+Exposes HTTP endpoints for account creation and session authentication.
+
+### Important code:
+* `POST /register`: Registers user with hashed password.
+* `POST /login`: Verifies password and returns signed JWT.
+* `GET /me`: Returns profile of the logged-in user.
+
+### What other files interact with it:
+* Mounted onto the main application in [`backend/app/main.py`](file:///c:/Users/Gopi/OneDrive/Desktop/cloud-it-service-portal/backend/app/main.py).
+
+### Beginner explanation:
+The front desk where new users sign up, registered users log in, and users ask for their profile details.
+
+### Interview explanation:
+> "`routers/auth.py` provides the REST controllers for user lifecycle management, returning standardized HTTP status codes (201 Created, 200 OK, 401 Unauthorized) and JWT credentials."
+
+---
+
+## File: `backend/app/main.py`
+
+### Purpose:
+Entrypoint for the FastAPI application.
+
+### Why it exists:
+Initializes the FastAPI instance, configures CORS middleware, registers routers under `/api`, creates tables on startup, and provides `/api/health`.
+
+### Important code:
+* `lifespan`: Startup context manager ensuring MySQL tables exist via `Base.metadata.create_all(bind=engine)`.
+* `CORSMiddleware`: Allows browser requests from `http://localhost:3000`.
+* `GET /api/health`: Probes database health via `SELECT 1`.
+
+### What happens when the application starts:
+Uvicorn loads `main.py`, connects to MySQL, ensures tables are ready, mounts routers, and begins listening for HTTP requests on port 8000.
+
+### What other files interact with it:
+The central coordinator for all routers, configs, and models.
+
+### Beginner explanation:
+The front door and brain of the backend server.
+
+### Interview explanation:
+> "`main.py` bootstraps the FastAPI application, configuring lifespan lifecycle hooks, CORS middleware for frontend communication, router aggregation, and the operational `/api/health` probe."

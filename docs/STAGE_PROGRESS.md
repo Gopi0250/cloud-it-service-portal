@@ -26,16 +26,18 @@ Statuses used:
 ---
 
 ### Stage 2 — Database Layer & JWT Authentication
-* **Status**: **IN PROGRESS**
-* **Goal**:
-  * Pydantic Settings configuration (`app/config.py`).
-  * SQLAlchemy engine, session maker, and DB base (`app/database.py`).
-  * Database ORM models for `User` and `ServiceRequest` (`app/models/`).
-  * Password hashing (`bcrypt`) and JWT token utilities (`app/security.py`).
-  * Pydantic schemas for input validation & output serialization (`app/schemas/`).
-  * Authentication dependencies & role guards (`app/dependencies.py`).
-  * Authentication endpoints (`/api/auth/register`, `/api/auth/login`, `/api/auth/me`).
-  * System health check endpoint (`/api/health`).
+* **Status**: **COMPLETED**
+* **Completed Date**: October 2026
+* **Key Achievements**:
+  * Pydantic Settings configuration ([`app/config.py`](file:///c:/Users/Gopi/OneDrive/Desktop/cloud-it-service-portal/backend/app/config.py)).
+  * SQLAlchemy engine with connection pool recycling and health pre-ping ([`app/database.py`](file:///c:/Users/Gopi/OneDrive/Desktop/cloud-it-service-portal/backend/app/database.py)).
+  * Relational ORM models for `User` and `ServiceRequest` with foreign key and cascade deletion ([`app/models/`](file:///c:/Users/Gopi/OneDrive/Desktop/cloud-it-service-portal/backend/app/models)).
+  * Salted password hashing (`bcrypt`) and JWT token utilities ([`app/security.py`](file:///c:/Users/Gopi/OneDrive/Desktop/cloud-it-service-portal/backend/app/security.py)).
+  * Input validation and response sanitization schemas ([`app/schemas/`](file:///c:/Users/Gopi/OneDrive/Desktop/cloud-it-service-portal/backend/app/schemas)).
+  * Authentication dependency guards and RBAC (`get_current_user`, `require_admin`) ([`app/dependencies.py`](file:///c:/Users/Gopi/OneDrive/Desktop/cloud-it-service-portal/backend/app/dependencies.py)).
+  * Authentication endpoints (`POST /api/auth/register`, `POST /api/auth/login`, `GET /api/auth/me`).
+  * System health check probe (`GET /api/health`).
+  * 100% integration tests passed.
 
 ---
 
