@@ -36,12 +36,12 @@ flowchart TD
         end
     end
 
-    Client <-->|HTTPS| ALB
-    ALB <-->|HTTP| EC2
-    EC2 <-->|SQL Port 3306| RDS
-    EC2 -.->|Simulated Workflows| S3
-    EC2 -.->|Instance Profile| IAM
-    EC2 -.->|Log Streaming| CW
+    Client <-->|"HTTPS"| ALB
+    ALB <-->|"HTTP"| EC2
+    EC2 <-->|"SQL Port 3306"| RDS
+    EC2 -.->|"Simulated Workflows"| S3
+    EC2 -.->|"Instance Profile"| IAM
+    EC2 -.->|"Log Streaming"| CW
 ```
 
 ---

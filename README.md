@@ -49,12 +49,12 @@ flowchart TD
         DB[("MySQL Database\n(cloud_it_portal)")]
     end
 
-    UI <-->|HTTP / REST (Bearer Token + JSON)| ROUTERS
+    UI <-->|"HTTP / REST (Bearer Token + JSON)"| ROUTERS
     ROUTERS --> RBAC
     ROUTERS --> VAL
     ROUTERS --> AUTO
     ROUTERS <--> ORM
-    ORM <-->|SQL Queries| DB
+    ORM <-->|"SQL Queries"| DB
 ```
 
 ---

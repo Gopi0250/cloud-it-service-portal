@@ -28,12 +28,12 @@ flowchart LR
         DB[("MySQL Database\n(Users & Service Requests)")]
     end
 
-    UI <-->|HTTP / REST (Bearer Token + JSON)| AUTH
+    UI <-->|"HTTP / REST (Bearer Token + JSON)"| AUTH
     AUTH <--> API
     API --> VAL
     API --> AUTO
     API <--> ORM
-    ORM <-->|SQL Queries| DB
+    ORM <-->|"SQL Queries"| DB
 ```
 
 #### Request & Security Flow
